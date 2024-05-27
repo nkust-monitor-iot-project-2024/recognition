@@ -11,7 +11,7 @@ dependencies = [
     "torch>=2.3.0",
     "torchvision>=0.18.0",
     "grpcio-reflection>=1.64.0",
-    "ultralytics @ git+https://github.com/THU-MIG/yolov10",
+    "ultralytics @ git+https://github.com/nkust-monitor-iot-project-2024/yolov10",
 ]
 readme = "README.md"
 requires-python = ">= 3.8"

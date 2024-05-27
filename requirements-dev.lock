@@ -109,7 +109,7 @@ typing-extensions==4.12.0
     # via torch
 tzdata==2024.1
     # via pandas
-ultralytics @ git+https://github.com/THU-MIG/yolov10@9f73bc77684326578bb61a3d3f88b7b445c0f92b
+ultralytics @ git+https://github.com/nkust-monitor-iot-project-2024/yolov10@9f73bc77684326578bb61a3d3f88b7b445c0f92b
     # via iot-recognition-service
 urllib3==2.2.1
     # via requests
