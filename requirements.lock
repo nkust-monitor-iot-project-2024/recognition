@@ -17,19 +17,26 @@ contourpy==1.2.1
     # via matplotlib
 cycler==0.12.1
     # via matplotlib
+deprecated==1.2.14
+    # via opentelemetry-api
+    # via opentelemetry-exporter-otlp-proto-http
 filelock==3.14.0
     # via torch
 fonttools==4.52.1
     # via matplotlib
 fsspec==2024.5.0
     # via torch
+googleapis-common-protos==1.63.0
+    # via opentelemetry-exporter-otlp-proto-http
 grpcio==1.64.0
     # via grpcio-reflection
     # via iot-recognition-service
-grpcio-reflection==1.64.0
+grpcio-reflection==1.62.2
     # via iot-recognition-service
 idna==3.7
     # via requests
+importlib-metadata==7.0.0
+    # via opentelemetry-api
 jinja2==3.1.4
     # via torch
 kiwisolver==1.4.5
@@ -54,6 +61,49 @@ numpy==1.26.4
 opencv-python==4.9.0.80
     # via iot-recognition-service
     # via ultralytics
+opentelemetry-api==1.24.0
+    # via opentelemetry-distro
+    # via opentelemetry-exporter-otlp-proto-http
+    # via opentelemetry-instrumentation
+    # via opentelemetry-instrumentation-grpc
+    # via opentelemetry-instrumentation-logging
+    # via opentelemetry-instrumentation-system-metrics
+    # via opentelemetry-instrumentation-urllib3
+    # via opentelemetry-sdk
+opentelemetry-distro==0.45b0
+    # via iot-recognition-service
+opentelemetry-exporter-otlp-proto-common==1.24.0
+    # via opentelemetry-exporter-otlp-proto-http
+opentelemetry-exporter-otlp-proto-http==1.24.0
+    # via iot-recognition-service
+opentelemetry-instrumentation==0.45b0
+    # via opentelemetry-distro
+    # via opentelemetry-instrumentation-grpc
+    # via opentelemetry-instrumentation-logging
+    # via opentelemetry-instrumentation-system-metrics
+    # via opentelemetry-instrumentation-urllib3
+opentelemetry-instrumentation-grpc==0.45b0
+    # via iot-recognition-service
+opentelemetry-instrumentation-logging==0.45b0
+    # via iot-recognition-service
+opentelemetry-instrumentation-system-metrics==0.45b0
+    # via iot-recognition-service
+opentelemetry-instrumentation-urllib3==0.45b0
+    # via iot-recognition-service
+opentelemetry-proto==1.24.0
+    # via opentelemetry-exporter-otlp-proto-common
+    # via opentelemetry-exporter-otlp-proto-http
+opentelemetry-sdk==1.24.0
+    # via opentelemetry-distro
+    # via opentelemetry-exporter-otlp-proto-http
+    # via opentelemetry-instrumentation-grpc
+    # via opentelemetry-instrumentation-system-metrics
+opentelemetry-semantic-conventions==0.45b0
+    # via opentelemetry-instrumentation-grpc
+    # via opentelemetry-instrumentation-urllib3
+    # via opentelemetry-sdk
+opentelemetry-util-http==0.45b0
+    # via opentelemetry-instrumentation-urllib3
 packaging==24.0
     # via matplotlib
 pandas==2.2.2
@@ -63,9 +113,12 @@ pillow==10.3.0
     # via matplotlib
     # via torchvision
     # via ultralytics
-protobuf==5.27.0
+protobuf==4.25.3
+    # via googleapis-common-protos
     # via grpcio-reflection
+    # via opentelemetry-proto
 psutil==5.9.8
+    # via opentelemetry-instrumentation-system-metrics
     # via ultralytics
 py-cpuinfo==9.0.0
     # via ultralytics
@@ -79,11 +132,14 @@ pytz==2024.1
 pyyaml==6.0.1
     # via ultralytics
 requests==2.32.2
+    # via opentelemetry-exporter-otlp-proto-http
     # via ultralytics
 scipy==1.13.1
     # via ultralytics
 seaborn==0.13.2
     # via ultralytics
+setuptools==70.0.0
+    # via opentelemetry-instrumentation
 six==1.16.0
     # via python-dateutil
 sympy==1.12
@@ -101,6 +157,7 @@ torchvision==0.18.0
 tqdm==4.66.4
     # via ultralytics
 typing-extensions==4.12.0
+    # via opentelemetry-sdk
     # via torch
 tzdata==2024.1
     # via pandas
@@ -108,3 +165,10 @@ ultralytics @ git+https://github.com/nkust-monitor-iot-project-2024/yolov10@9f73
     # via iot-recognition-service
 urllib3==2.2.1
     # via requests
+wrapt==1.16.0
+    # via deprecated
+    # via opentelemetry-instrumentation
+    # via opentelemetry-instrumentation-grpc
+    # via opentelemetry-instrumentation-urllib3
+zipp==3.19.0
+    # via importlib-metadata

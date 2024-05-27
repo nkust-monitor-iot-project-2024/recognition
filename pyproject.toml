@@ -10,8 +10,15 @@ dependencies = [
     "opencv-python>=4.9.0.80",
     "torch>=2.3.0",
     "torchvision>=0.18.0",
-    "grpcio-reflection>=1.64.0",
+    "grpcio-reflection<=1.64.0",
     "ultralytics @ git+https://github.com/nkust-monitor-iot-project-2024/yolov10",
+    "opentelemetry-distro>=0.45b0",
+    "opentelemetry-instrumentation-grpc>=0.45b0",
+    "opentelemetry-instrumentation-logging>=0.45b0",
+    "opentelemetry-instrumentation-system-metrics>=0.45b0",
+    "opentelemetry-instrumentation-urllib3>=0.45b0",
+    "opentelemetry-exporter-otlp-proto-http>=1.24.0",
+    "baselime-opentelemetry>=0.2.14",
 ]
 readme = "README.md"
 requires-python = ">= 3.8"
@@ -27,7 +34,7 @@ build-backend = "hatchling.build"
 [tool.rye]
 managed = true
 dev-dependencies = [
-    "grpcio-tools>=1.64.0",
+    "grpcio-tools<=1.64.0",
 ]
 
 [tool.hatch.metadata]
