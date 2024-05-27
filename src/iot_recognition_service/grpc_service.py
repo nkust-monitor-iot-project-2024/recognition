@@ -1,3 +1,6 @@
+import logging
+from tempfile import TemporaryFile
+from traceback import print_exception
 import cv2
 import grpc
 import numpy as np
@@ -11,11 +14,18 @@ class RecognitionService(EntityRecognitionServicer):
         self.recognizer = recognizer
 
     def Recognize(self, request: RecognizeRequest, context: grpc.ServicerContext) -> RecognizeResponse:
+        if len(request.image) == 0:
+            context.abort(grpc.StatusCode.INVALID_ARGUMENT, "No image is provided.")
+
         try:
-            img_nparray = np.frombuffer(request.image)
+            img_nparray = np.frombuffer(request.image, dtype=np.uint8)
             decoded_image = cv2.imdecode(img_nparray, cv2.IMREAD_COLOR)
         except cv2.error as e:
+            print_exception(e)
             context.abort(grpc.StatusCode.INVALID_ARGUMENT, str(e))
+        except Exception as e:
+            print_exception(e)
+            context.abort(grpc.StatusCode.INTERNAL, str(e))
 
         entities = self.recognizer.recognize_picture(decoded_image)
         return RecognizeResponse(

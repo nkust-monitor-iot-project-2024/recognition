@@ -23,7 +23,10 @@ fonttools==4.52.1
 fsspec==2024.5.0
     # via torch
 grpcio==1.64.0
+    # via grpcio-reflection
     # via grpcio-tools
+    # via iot-recognition-service
+grpcio-reflection==1.64.0
     # via iot-recognition-service
 grpcio-tools==1.64.0
 idna==3.7
@@ -62,6 +65,7 @@ pillow==10.3.0
     # via torchvision
     # via ultralytics
 protobuf==5.27.0
+    # via grpcio-reflection
     # via grpcio-tools
 psutil==5.9.8
     # via ultralytics

@@ -2,13 +2,17 @@ from concurrent import futures
 import logging
 import os
 import grpc
+from grpc_reflection.v1alpha import reflection
 
 from iot_recognition_service.grpc_service import RecognitionService
+from iot_recognition_service.protos import entityrecognitionpb_pb2
 from .protos import entityrecognitionpb_pb2_grpc
 
 from .recognition import Recognizer
 
 def main() -> int:
+    logging.basicConfig(level=logging.INFO)
+
     device = os.getenv("IOT_RECOGNITION_DEVICE", "cuda")
     model = os.getenv("IOT_RECOGNITION_MODEL", "model/yolov10x.pt")
 
@@ -23,9 +27,13 @@ def main() -> int:
 
     server = grpc.server(
         thread_pool=futures.ThreadPoolExecutor(max_workers=8),
-        compression=grpc.Compression.Gzip
+        compression=grpc.Compression.Gzip,
     )
     entityrecognitionpb_pb2_grpc.add_EntityRecognitionServicer_to_server(recognizer_grpc_service, server)
+    reflection.enable_server_reflection((
+        entityrecognitionpb_pb2.DESCRIPTOR.services_by_name["EntityRecognition"].full_name,
+        reflection.SERVICE_NAME,
+    ), server)
 
     if tls_cert and tls_key:
         with open(tls_key, "rb") as f:
