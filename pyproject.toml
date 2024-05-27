@@ -5,12 +5,19 @@ description = "Add your description here"
 authors = [
     { name = "pan93412", email = "pan93412@gmail.com" }
 ]
-dependencies = []
+dependencies = [
+    "grpcio>=1.64.0",
+    "ultralytics @ file:///Volumes/Dev/nkust-projects/iot-recognition-service/vendor/yolo",
+    "opencv-python>=4.9.0.80",
+    "torch>=2.3.0",
+    "torchvision>=0.18.0",
+]
 readme = "README.md"
 requires-python = ">= 3.8"
 
 [project.scripts]
 "iot-recognition-service" = "iot_recognition_service:main"
+"cli-recognizer" = "iot_recognition_service.examples.cli_recognizer:main"
 
 [build-system]
 requires = ["hatchling"]
@@ -18,7 +25,9 @@ build-backend = "hatchling.build"
 
 [tool.rye]
 managed = true
-dev-dependencies = []
+dev-dependencies = [
+    "grpcio-tools>=1.64.0",
+]
 
 [tool.hatch.metadata]
 allow-direct-references = true
