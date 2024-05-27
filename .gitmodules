@@ -1,3 +1,0 @@
-[submodule "vendor/yolo"]
-	path = vendor/yolo
-	url = https://github.com/THU-MIG/yolov10
