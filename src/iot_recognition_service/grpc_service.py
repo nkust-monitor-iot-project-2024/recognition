@@ -10,24 +10,21 @@ from .protos.entityrecognitionpb_pb2 import RecognizeRequest, RecognizeResponse,
 from .protos.entityrecognitionpb_pb2_grpc import EntityRecognitionServicer
 
 class RecognitionService(EntityRecognitionServicer):
+    """The gRPC service for recognizing objects in an image."""
+
     def __init__(self, recognizer: Recognizer):
         self.recognizer = recognizer
 
     def Recognize(self, request: RecognizeRequest, context: grpc.ServicerContext) -> RecognizeResponse:
-        if len(request.image) == 0:
-            context.abort(grpc.StatusCode.INVALID_ARGUMENT, "No image is provided.")
-
         try:
-            img_nparray = np.frombuffer(request.image, dtype=np.uint8)
-            decoded_image = cv2.imdecode(img_nparray, cv2.IMREAD_COLOR)
-        except cv2.error as e:
+            entities = self.recognizer.recognize_picture(request.image)
+        except ValueError as e:
             print_exception(e)
             context.abort(grpc.StatusCode.INVALID_ARGUMENT, str(e))
-        except Exception as e:
+        except RuntimeError as e:
             print_exception(e)
             context.abort(grpc.StatusCode.INTERNAL, str(e))
 
-        entities = self.recognizer.recognize_picture(decoded_image)
         return RecognizeResponse(
             entities=(
                 Entity(
