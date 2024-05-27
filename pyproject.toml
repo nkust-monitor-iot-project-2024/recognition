@@ -1,17 +1,17 @@
 [project]
 name = "iot-recognition-service"
 version = "0.1.0"
-description = "Add your description here"
+description = "The gRPC server and module for recognizing the entities in the IoT pictures"
 authors = [
     { name = "pan93412", email = "pan93412@gmail.com" }
 ]
 dependencies = [
     "grpcio>=1.64.0",
-    "ultralytics @ file:///Volumes/Dev/nkust-projects/iot-recognition-service/vendor/yolo",
     "opencv-python>=4.9.0.80",
     "torch>=2.3.0",
     "torchvision>=0.18.0",
     "grpcio-reflection>=1.64.0",
+    "ultralytics @ git+https://github.com/THU-MIG/yolov10",
 ]
 readme = "README.md"
 requires-python = ">= 3.8"
