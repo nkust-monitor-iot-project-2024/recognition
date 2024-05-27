@@ -4,9 +4,9 @@ tasks:
   protoc:
     env:
       VIRTUAL_ENV: "{{ .ROOT_DIR }}/.venv"
-    dir: "{{ .ROOT_DIR }}/src/iot_recognition_service/proto"
+    dir: "{{ .ROOT_DIR }}/src"
     cmds:
-      - $VIRTUAL_ENV/bin/python3 -m grpc_tools.protoc -I. --python_out=. --pyi_out=. --grpc_python_out=. **/*.proto
+      - $VIRTUAL_ENV/bin/python3 -m grpc_tools.protoc -Iiot_recognition_service/protos=protos --python_out=. --pyi_out=. --grpc_python_out=. protos/*.proto
 
   generate:
     deps: [protoc]

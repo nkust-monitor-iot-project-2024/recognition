@@ -1,7 +1,10 @@
+from concurrent import futures
+import logging
 import os
-from uuid import uuid4
-from ultralytics import YOLOv10
-import cv2
+import grpc
+
+from iot_recognition_service.grpc_service import RecognitionService
+from .protos import entityrecognitionpb_pb2_grpc
 
 from .recognition import Recognizer
 
@@ -9,20 +12,46 @@ def main() -> int:
     device = os.getenv("IOT_RECOGNITION_DEVICE", "cuda")
     model = os.getenv("IOT_RECOGNITION_MODEL", "model/yolov10x.pt")
 
-    cv2.namedWindow('YOLO', cv2.WINDOW_NORMAL)
+    tls_key = os.getenv("IOT_RECOGNITION_TLS_KEY")
+    tls_cert = os.getenv("IOT_RECOGNITION_TLS_CERT")
+    tls_ca = os.getenv("IOT_RECOGNITION_TLS_CA")
+
+    server_port = os.getenv("IOT_RECOGNITION_SERVER_PORT", "50051")
 
     recognizer = Recognizer.init_from_model_filename(model, device)
-    cap = cv2.VideoCapture(0)
-    while True:
-        ok, frame = cap.read()
-        if not ok:
-            continue
+    recognizer_grpc_service = RecognitionService(recognizer)
 
-        entities = recognizer.recognize_picture(frame)
-        for entity in entities:
-            uuid = uuid4()
+    server = grpc.server(
+        thread_pool=futures.ThreadPoolExecutor(max_workers=8),
+        compression=grpc.Compression.Gzip
+    )
+    entityrecognitionpb_pb2_grpc.add_EntityRecognitionServicer_to_server(recognizer_grpc_service, server)
 
-            print(f"Detected entity: {entity.label} (at {entity.x1}, {entity.y1}, {entity.x2}, {entity.y2}), confidence={entity.confidence}, uuid={uuid}")
+    if tls_cert and tls_key:
+        with open(tls_key, "rb") as f:
+            tls_key_data = f.read()
+        with open(tls_cert, "rb") as f:
+            tls_cert_data = f.read()
 
-            with open(f"imgs/out_{entity.label}_{uuid}.jpg", "wb") as f:
-                f.write(entity.image)
+        if tls_ca:
+            with open(tls_ca, "rb") as f:
+                tls_ca_data = f.read()
+        else:
+            tls_ca_data = None
+
+        server_credentials = grpc.ssl_server_credentials(
+            private_key_certificate_chain_pairs=[(tls_key_data, tls_cert_data)],
+            root_certificates=tls_ca_data,
+            require_client_auth=tls_ca_data is not None
+        )
+
+        server.add_secure_port(f"[::]:{server_port}", server_credentials)
+    else:
+        logging.warn("Running server without TLS – insecure warning!!")
+        server.add_insecure_port(f"[::]:{server_port}")
+
+    server.start()
+    logging.info(f"Server started on port {server_port}")
+    server.wait_for_termination()
+
+    return 0
