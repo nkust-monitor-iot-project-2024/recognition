@@ -7,7 +7,7 @@ from cv2.typing import MatLike
 import numpy as np
 from numpy import ndarray
 from torch import Tensor
-from opentelemetry import trace
+from opentelemetry import trace, _logs
 from ultralytics import YOLOv10
 from ultralytics.engine.results import Results
 
@@ -38,7 +38,7 @@ class Entity:
 class Recognizer:
     """The high level wrapper of YOLOv10 for recognizing objects in an image."""
 
-    logger = logging.getLogger(__name__)
+    logger = _logs.get_logger(__name__)
     tracer = trace.get_tracer(__name__)
 
     def __init__(self, model: YOLOv10, device: str):
@@ -99,6 +99,8 @@ class Recognizer:
                 box_tensor_to_entity(data, names, decoded_frame)
                 for data in result.boxes.data
             ]
+            logging.info("Recognized entities: %s", [entity.label for entity in entities])
+            span.add_event("recognized")
 
             return entities
 
