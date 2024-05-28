@@ -1,9 +1,7 @@
 import logging
-from traceback import print_exception
 import grpc
 
 from opentelemetry import trace
-from opentelemetry.trace import SpanKind
 
 from iot_recognition_service.recognition import Recognizer
 from .protos.entityrecognitionpb_pb2 import RecognizeRequest, RecognizeResponse, Entity

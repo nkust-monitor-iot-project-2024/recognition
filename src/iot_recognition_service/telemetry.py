@@ -54,7 +54,7 @@ def create_trace_exporter() -> SpanExporter:
 
     baselime_dataset = os.getenv("BASELIME_DATASET", "otel")
 
-    return OTLPSpanExporter(endpoint="otel.baselime.io/v1/traces", headers={
+    return OTLPSpanExporter(endpoint="https://otel.baselime.io/v1/traces", headers={
         "x-api-key": baselime_api_key,
         "x-baselime-dataset": baselime_dataset,
     })
@@ -70,7 +70,7 @@ def create_log_exporter() -> LogExporter:
 
     baselime_dataset = os.getenv("BASELIME_DATASET", "otel")
 
-    return OTLPLogExporter(endpoint="otel.baselime.io/v1/logs", headers={
+    return OTLPLogExporter(endpoint="https://otel.baselime.io/v1/logs", headers={
         "x-api-key": baselime_api_key,
         "x-baselime-dataset": baselime_dataset,
     })
