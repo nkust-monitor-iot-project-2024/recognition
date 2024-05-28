@@ -2,6 +2,7 @@ import logging
 import grpc
 
 from opentelemetry import trace
+from opentelemetry.trace import SpanKind
 
 from iot_recognition_service.recognition import Recognizer
 from .protos.entityrecognitionpb_pb2 import RecognizeRequest, RecognizeResponse, Entity
@@ -17,7 +18,7 @@ class RecognitionService(EntityRecognitionServicer):
         self.recognizer = recognizer
 
     def Recognize(self, request: RecognizeRequest, context: grpc.ServicerContext) -> RecognizeResponse:
-        with self.tracer.start_as_current_span("RecognitionService/Recognize") as span:
+        with self.tracer.start_as_current_span("RecognitionService/Recognize", kind=SpanKind.SERVER) as span:
             span.add_event("recognize picture")
             try:
                 entities = self.recognizer.recognize_picture(request.image)

@@ -8,6 +8,7 @@ import numpy as np
 from numpy import ndarray
 from torch import Tensor
 from opentelemetry import trace, _logs
+from opentelemetry.trace import SpanKind
 from ultralytics import YOLOv10
 from ultralytics.engine.results import Results
 
@@ -73,7 +74,7 @@ class Recognizer:
             RuntimeError: If an unknown error occurs.
         """
 
-        with self.tracer.start_as_current_span("Recognizer.recognize_picture") as span:
+        with self.tracer.start_as_current_span("Recognizer.recognize_picture", kind=SpanKind.INTERNAL) as span:
             span.add_event("decoding picture")
             decoded_frame = decode_image(image)
 
