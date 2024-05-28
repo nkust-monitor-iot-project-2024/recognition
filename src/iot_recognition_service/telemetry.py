@@ -19,12 +19,12 @@ from opentelemetry.sdk.trace.export import SpanExporter
 from opentelemetry.sdk._logs.export import LogExporter
 
 
-
 resource = Resource(attributes={
     ResourceAttributes.SERVICE_NAME: "iot-recognition-service",
     ResourceAttributes.SERVICE_VERSION: "v0",
     ResourceAttributes.SERVICE_INSTANCE_ID: uuid4().hex,
 }, schema_url=ResourceAttributes.SCHEMA_URL)
+
 
 def setup_telemetry() -> None:
     """Setup the OpenTelemetry SDK for Baselime, and instrument the gRPC client."""

@@ -22,6 +22,8 @@ rye run iot-recognition-service
 - `IOT_RECOGNITION_SERVER_TLS_CERT`: Specify the path to the TLS certificate file. Default is empty (insecure).
 - `IOT_RECOGNITION_SERVER_TLS_KEY`: Specify the path to the TLS key file. Default is empty (insecure).
 - `IOT_RECOGNITION_SERVER_TLS_CA`: Specify the path to the CA key file. Default is empty (`require_client_auth=false`).
+- `BASELIME_API_KEY`: Specify the API key for the Baselime API. Default is empty (standard output).
+- `BASELIME_DATASET`: Specify the dataset name for the Baselime API. Default is `otel`.
 
 ## License
 

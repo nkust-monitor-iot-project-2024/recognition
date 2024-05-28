@@ -7,6 +7,7 @@ from cv2.typing import MatLike
 import numpy as np
 from numpy import ndarray
 from torch import Tensor
+from opentelemetry import trace
 from ultralytics import YOLOv10
 from ultralytics.engine.results import Results
 
@@ -37,6 +38,9 @@ class Entity:
 class Recognizer:
     """The high level wrapper of YOLOv10 for recognizing objects in an image."""
 
+    logger = logging.getLogger(__name__)
+    tracer = trace.get_tracer(__name__)
+
     def __init__(self, model: YOLOv10, device: str):
         self.model = model
         self.device = device
@@ -49,7 +53,6 @@ class Recognizer:
             filename: The filename of the model.
             device: The Torch device to run the model on.
         """
-
         return cls(model=YOLOv10(filename), device=device)
 
     """Recognition class for recognizing objects in an image."""
@@ -70,25 +73,34 @@ class Recognizer:
             RuntimeError: If an unknown error occurs.
         """
 
-        decoded_frame = decode_image(image)
+        with self.tracer.start_as_current_span("Recognizer.recognize_picture") as span:
+            span.add_event("decoding picture")
+            decoded_frame = decode_image(image)
 
-        results: list[Results] = self.model.predict(decoded_frame, device=self.device)
-        if len(results) == 0:
-            logging.warning("No Results detected in the image.")
-            return []
+            span.add_event("start recognition by calling YOLO")
+            results: list[Results] = self.model.predict(decoded_frame, device=self.device)
+            if len(results) == 0:
+                span.add_event("no results detected")
 
-        result = results[0]
-        if result.boxes is None:
-            logging.warning("No boxes detected in the image.")
-            return []
+                span.set_status(trace.StatusCode.OK, "No Results detected in the image.")
+                return []
 
-        names = self.model.names
-        entities = [
-            box_tensor_to_entity(data, names, decoded_frame)
-            for data in result.boxes.data
-        ]
+            span.add_event("finding box in the recognition results")
+            result = results[0]
+            if result.boxes is None:
+                span.add_event("no boxes detected")
 
-        return entities
+                span.set_status(trace.StatusCode.OK, "No boxes detected in the image.")
+                return []
+
+            span.add_event("converting box tensor to entities")
+            names = self.model.names
+            entities = [
+                box_tensor_to_entity(data, names, decoded_frame)
+                for data in result.boxes.data
+            ]
+
+            return entities
 
 
 def decode_image(image: bytes) -> MatLike:

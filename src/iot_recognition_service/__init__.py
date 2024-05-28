@@ -6,6 +6,7 @@ from grpc_reflection.v1alpha import reflection
 
 from iot_recognition_service.grpc_service import RecognitionService
 from iot_recognition_service.protos import entityrecognitionpb_pb2
+from iot_recognition_service.telemetry import setup_telemetry
 from .protos import entityrecognitionpb_pb2_grpc
 
 from .recognition import Recognizer
@@ -36,6 +37,8 @@ def main() -> int:
     ), server)
 
     if tls_cert and tls_key:
+        logging.info("Running server with TLS certificate")
+
         with open(tls_key, "rb") as f:
             tls_key_data = f.read()
         with open(tls_cert, "rb") as f:
@@ -58,8 +61,10 @@ def main() -> int:
         logging.warn("Running server without TLS – insecure warning!!")
         server.add_insecure_port(f"[::]:{server_port}")
 
-    server.start()
     logging.info(f"Server started on port {server_port}")
+    setup_telemetry()
+
+    server.start()
     server.wait_for_termination()
 
     return 0
