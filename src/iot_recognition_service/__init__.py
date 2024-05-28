@@ -17,9 +17,9 @@ def main() -> int:
     device = os.getenv("IOT_RECOGNITION_DEVICE", "cuda")
     model = os.getenv("IOT_RECOGNITION_MODEL", "model/yolov10x.pt")
 
-    tls_key = os.getenv("IOT_RECOGNITION_TLS_KEY")
-    tls_cert = os.getenv("IOT_RECOGNITION_TLS_CERT")
-    tls_ca = os.getenv("IOT_RECOGNITION_TLS_CA")
+    tls_key = os.getenv("IOT_RECOGNITION_SERVER_TLS_KEY")
+    tls_cert = os.getenv("IOT_RECOGNITION_SERVER_TLS_CERT")
+    tls_ca = os.getenv("IOT_RECOGNITION_SERVER_TLS_CA")
 
     server_port = os.getenv("IOT_RECOGNITION_SERVER_PORT", "50051")
 
