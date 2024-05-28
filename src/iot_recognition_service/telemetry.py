@@ -2,7 +2,6 @@ import logging
 import os
 from uuid import uuid4
 from opentelemetry.trace import set_tracer_provider
-from opentelemetry.instrumentation.grpc import GrpcInstrumentorClient
 from opentelemetry.sdk.trace import TracerProvider
 from opentelemetry.sdk.trace.export import (
     ConsoleSpanExporter,
@@ -40,8 +39,6 @@ def setup_telemetry() -> None:
        BatchLogRecordProcessor(create_log_exporter())
     )
     set_logger_provider(logger_provider)
-
-    GrpcInstrumentorClient().instrument()
 
 
 def create_trace_exporter() -> SpanExporter:

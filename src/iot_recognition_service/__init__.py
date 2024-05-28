@@ -3,15 +3,20 @@ import logging
 import os
 import grpc
 from grpc_reflection.v1alpha import reflection
+from opentelemetry.instrumentation.grpc import GrpcInstrumentorServer
 
 from iot_recognition_service.grpc_service import RecognitionService
 from iot_recognition_service.protos import entityrecognitionpb_pb2
 from iot_recognition_service.telemetry import setup_telemetry
+
 from .protos import entityrecognitionpb_pb2_grpc
 
 from .recognition import Recognizer
 
+GrpcInstrumentorServer().instrument()
+
 def main() -> int:
+    setup_telemetry()
     logging.basicConfig(level=logging.INFO)
 
     device = os.getenv("IOT_RECOGNITION_DEVICE", "cuda")
@@ -62,7 +67,6 @@ def main() -> int:
         server.add_insecure_port(f"[::]:{server_port}")
 
     logging.info(f"Server started on port {server_port}")
-    setup_telemetry()
 
     server.start()
     server.wait_for_termination()
