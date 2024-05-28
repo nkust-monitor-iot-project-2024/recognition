@@ -21,7 +21,7 @@ class RecognitionService(EntityRecognitionServicer):
         with self.tracer.start_as_current_span("RecognitionService/Recognize", kind=SpanKind.SERVER) as span:
             span.add_event("recognize picture")
             try:
-                entities = self.recognizer.recognize_picture(request.image)
+                entities = self.recognizer.recognize_picture(request.image, request.image_mime)
             except ValueError as e:
                 span.set_status(trace.StatusCode.ERROR, "User specifies a invalid argument")
                 span.record_exception(e)
@@ -44,6 +44,7 @@ class RecognitionService(EntityRecognitionServicer):
                         y2=entity.y2,
                         confidence=entity.confidence,
                         image=entity.image,
+                        image_mime=entity.image_mime,
                     )
                     for entity in entities
                 )

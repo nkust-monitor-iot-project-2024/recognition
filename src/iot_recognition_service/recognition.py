@@ -1,5 +1,6 @@
 from dataclasses import dataclass
 import logging
+import mimetypes
 from typing import Self
 
 import cv2
@@ -24,7 +25,8 @@ class Entity:
         y1: The lower y coordinate of the bounding box.
         y2: The higher y coordinate of the bounding box.
         confidence: The confidence of the object detection in range [0.0, 1.0].
-        image: The cropped image of the object in JPEG format.
+        image: The cropped image of the object.
+        image_mime: The MIME type of the image.
     """
     label: str
     x1: float
@@ -33,6 +35,7 @@ class Entity:
     y2: float
     confidence: float
     image: bytes
+    image_mime: str
 
 
 
@@ -57,11 +60,12 @@ class Recognizer:
         return cls(model=YOLOv10(filename), device=device)
 
     """Recognition class for recognizing objects in an image."""
-    def recognize_picture(self, image: bytes) -> list[Entity]:
+    def recognize_picture(self, image: bytes, image_mime: str) -> list[Entity]:
         """Recognize objects in an image.
 
         Args:
             image: The image data as bytes.
+            image_mime: The MIME type of the image.
 
         Returns:
             A list of Entity objects representing the objects detected in the image.
@@ -70,13 +74,13 @@ class Recognizer:
             ValueError: If the image is empty.
             ValueError: If the image cannot be decoded with cv2.
             ValueError: If the image cannot be converted to a numpy array.
-            ValueError: If the cropped image cannot be encoded to JPG.
+            ValueError: If the cropped image cannot be encoded to the given fromat.
             RuntimeError: If an unknown error occurs.
         """
 
         with self.tracer.start_as_current_span("Recognizer.recognize_picture", kind=SpanKind.INTERNAL) as span:
             span.add_event("decoding picture")
-            decoded_frame = decode_image(image)
+            decoded_frame = decode_image(image, image_mime)
 
             span.add_event("start recognition by calling YOLO")
             results: list[Results] = self.model.predict(decoded_frame, device=self.device)
@@ -97,7 +101,7 @@ class Recognizer:
             span.add_event("converting box tensor to entities")
             names = self.model.names
             entities = [
-                box_tensor_to_entity(data, names, decoded_frame)
+                box_tensor_to_entity(data, names, decoded_frame, image_mime)
                 for data in result.boxes.data
             ]
             logging.info("Recognized entities: %s", [entity.label for entity in entities])
@@ -106,17 +110,19 @@ class Recognizer:
             return entities
 
 
-def decode_image(image: bytes) -> MatLike:
+def decode_image(image: bytes, mime: str) -> MatLike:
     """Decode an image from bytes to a numpy array.
 
     Args:
-        image: The image JPEG data as bytes.
+        image: The image data as bytes.
+        mime: The MIME type of the image.
 
     Returns:
         The decoded image as a numpy array.
 
     Exceptions:
         ValueError: If the image is empty.
+        ValueError: If the image MIME type is not one of PNG or JPEG.
         ValueError: If the image cannot be decoded with cv2.
         ValueError: If the image cannot be converted to a numpy array.
         RuntimeError: If an unknown error occurs.
@@ -124,6 +130,9 @@ def decode_image(image: bytes) -> MatLike:
 
     if len(image) == 0:
         raise ValueError("No image is provided.")
+
+    if mime not in ["image/jpeg", "image/png"]:
+        raise ValueError("Invalid image MIME type.")
 
     try:
         img_nparray = np.frombuffer(image, dtype=np.uint8)
@@ -136,19 +145,21 @@ def decode_image(image: bytes) -> MatLike:
         raise RuntimeError("Unknown error") from e
 
 
-def box_tensor_to_entity(box_tensor: Tensor | ndarray, names: list[str], frame: MatLike) -> Entity:
+def box_tensor_to_entity(box_tensor: Tensor | ndarray, names: list[str], frame: MatLike, image_mime_to_encode: str) -> Entity:
     """Turn a box tensor returns by YOLO to the high-level Entity.
 
     Args:
         box_tensor: The box tensor (YOLO.predict().boxes[0])
         names: The names of the objects.
         frame: The frame from which the box tensor was extracted.
+        image_mime_to_encode: The MIME type of the encoded image.
 
     Returns:
         The Entity object.
 
     Exceptions:
-        ValueError: If the cropped image cannot be encoded to JPG.
+        ValueError: If the cropped image cannot be encoded to the given format.
+        ValueError: If the image MIME type is not supported.
     """
     x1 = int(box_tensor[0])
     y1 = int(box_tensor[1])
@@ -160,14 +171,18 @@ def box_tensor_to_entity(box_tensor: Tensor | ndarray, names: list[str], frame: 
     cropped_image = frame[y1:y2, x1:x2]
 
     try:
-        ok, cropped_image_jpg = cv2.imencode('.jpg', cropped_image)
+        extension = mimetypes.guess_extension(image_mime_to_encode)
+        if extension is None:
+            raise ValueError("Unsupported image MIME type.")
+
+        ok, cropped_image_encoded = cv2.imencode('.'+extension, cropped_image)
         assert ok
     except cv2.error as e:
         raise ValueError("Failed to encode the cropped image to JPG.") from e
     except AssertionError:
         raise ValueError("Failed to encode the cropped image to JPG.")
 
-    cropped_image_jpg_bytes = cropped_image_jpg.tobytes(order="C")
+    cropped_image_jpg_bytes = cropped_image_encoded.tobytes(order="C")
 
     return Entity(
         label=label,
@@ -176,6 +191,7 @@ def box_tensor_to_entity(box_tensor: Tensor | ndarray, names: list[str], frame: 
         x2=x2,
         y2=y2,
         confidence=confidence,
-        image=cropped_image_jpg_bytes
+        image=cropped_image_jpg_bytes,
+        image_mime=image_mime_to_encode,
     )
 
