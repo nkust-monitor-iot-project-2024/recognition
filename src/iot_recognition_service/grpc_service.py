@@ -1,7 +1,6 @@
-import logging
 import grpc
 
-from opentelemetry import trace
+from opentelemetry import trace, _logs
 from opentelemetry.trace import SpanKind
 
 from iot_recognition_service.recognition import Recognizer
@@ -11,7 +10,7 @@ from .protos.entityrecognitionpb_pb2_grpc import EntityRecognitionServicer
 class RecognitionService(EntityRecognitionServicer):
     """The gRPC service for recognizing objects in an image."""
 
-    logger = logging.getLogger(__name__)
+    logger = _logs.get_logger(__name__)
     tracer = trace.get_tracer(__name__)
 
     def __init__(self, recognizer: Recognizer):
