@@ -42,8 +42,8 @@ class Entity:
 class Recognizer:
     """The high level wrapper of YOLOv10 for recognizing objects in an image."""
 
-    logger = _logs.get_logger(__name__)
-    tracer = trace.get_tracer(__name__)
+    logger = _logs.get_logger("recognizer")
+    tracer = trace.get_tracer("recognizer")
 
     def __init__(self, model: YOLOv10, device: str):
         self.model = model

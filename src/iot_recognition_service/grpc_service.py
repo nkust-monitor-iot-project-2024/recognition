@@ -10,8 +10,8 @@ from .protos.entityrecognitionpb_pb2_grpc import EntityRecognitionServicer
 class RecognitionService(EntityRecognitionServicer):
     """The gRPC service for recognizing objects in an image."""
 
-    logger = _logs.get_logger(__name__)
-    tracer = trace.get_tracer(__name__)
+    logger = _logs.get_logger("recognition-service")
+    tracer = trace.get_tracer("recognition-service")
 
     def __init__(self, recognizer: Recognizer):
         self.recognizer = recognizer
