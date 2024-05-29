@@ -8,6 +8,12 @@ You may need to install [`rye`](https://rye-up.com) to run the server.
 
 You also need to download a model in [GitHub](https://github.com/THU-MIG/yolov10/tree/main?tab=readme-ov-file#performance) and put it in the `model` folder.
 
+You also need to generate the Python code from the proto file by:
+
+```sh
+task generate
+```
+
 Then, you can run the server by:
 
 ```rye
