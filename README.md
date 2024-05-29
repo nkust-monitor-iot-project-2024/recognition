@@ -16,7 +16,7 @@ task generate
 
 Then, you can run the server by:
 
-```rye
+```sh
 rye run iot-recognition-service
 ```
 
