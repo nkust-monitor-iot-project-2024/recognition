@@ -59,31 +59,25 @@ class Recognizer:
         """
         return cls(model=YOLOv10(filename), device=device)
 
-    """Recognition class for recognizing objects in an image."""
-    def recognize_picture(self, image: bytes, image_mime: str) -> list[Entity]:
-        """Recognize objects in an image.
+
+    def recognize_frame(self, frame: MatLike, image_mime: str) -> list[Entity]:
+        """Recognize objects in a frame.
 
         Args:
-            image: The image data as bytes.
-            image_mime: The MIME type of the image.
+            frame: The decoded OpenCV frame.
+            image_mime: The expected MIME type of the image that will be encoded in Entity.
 
         Returns:
             A list of Entity objects representing the objects detected in the image.
 
         Exceptions:
-            ValueError: If the image is empty.
-            ValueError: If the image cannot be decoded with cv2.
-            ValueError: If the image cannot be converted to a numpy array.
-            ValueError: If the cropped image cannot be encoded to the given fromat.
-            RuntimeError: If an unknown error occurs.
+            ValueError: If the cropped image cannot be encoded to the given format.
+            ValueError: If the image MIME type is not supported.
         """
 
-        with self.tracer.start_as_current_span("Recognizer.recognize_picture", kind=SpanKind.INTERNAL) as span:
-            span.add_event("decoding picture")
-            decoded_frame = decode_image(image, image_mime)
-
+        with self.tracer.start_as_current_span("Recognizer.recognize_frame", kind=SpanKind.INTERNAL) as span:
             span.add_event("start recognition by calling YOLO")
-            results: list[Results] = self.model.predict(decoded_frame, device=self.device)
+            results: list[Results] = self.model.predict(frame, device=self.device)
             if len(results) == 0:
                 span.add_event("no results detected")
 
@@ -101,12 +95,40 @@ class Recognizer:
             span.add_event("converting box tensor to entities")
             names = self.model.names
             entities = [
-                box_tensor_to_entity(data, names, decoded_frame, image_mime)
+                box_tensor_to_entity(data, names, frame, image_mime)
                 for data in result.boxes.data
             ]
             logging.info("Recognized entities: %s", [entity.label for entity in entities])
             span.add_event("recognized")
 
+            return entities
+
+
+    def recognize_picture(self, image: bytes, image_mime: str) -> list[Entity]:
+        """Recognize objects in an image.
+
+        Args:
+            image: The image data as bytes.
+            image_mime: The MIME type of the image.
+
+        Returns:
+            A list of Entity objects representing the objects detected in the image.
+
+        Exceptions:
+            ValueError: If the image is empty.
+            ValueError: If the image cannot be decoded with cv2.
+            ValueError: If the image cannot be converted to a numpy array.
+            ValueError: If the cropped image cannot be encoded to the given fromat.
+        """
+
+        with self.tracer.start_as_current_span("Recognizer.recognize_picture", kind=SpanKind.INTERNAL) as span:
+            span.add_event("decoding picture")
+            decoded_frame = decode_image(image, image_mime)
+
+            span.add_event("recognize with the decoded frame")
+            entities = self.recognize_frame(decoded_frame, image_mime)
+
+            span.add_event("completed the recognition")
             return entities
 
 
@@ -178,11 +200,11 @@ def box_tensor_to_entity(box_tensor: Tensor | ndarray, names: list[str], frame: 
         ok, cropped_image_encoded = cv2.imencode('.'+extension, cropped_image)
         assert ok
     except cv2.error as e:
-        raise ValueError("Failed to encode the cropped image to JPG.") from e
+        raise ValueError(f"Failed to encode the cropped image to {image_mime_to_encode}.") from e
     except AssertionError:
-        raise ValueError("Failed to encode the cropped image to JPG.")
+        raise ValueError(f"Failed to encode the cropped image to {image_mime_to_encode}.")
 
-    cropped_image_jpg_bytes = cropped_image_encoded.tobytes(order="C")
+    cropped_image_bytes = cropped_image_encoded.tobytes(order="C")
 
     return Entity(
         label=label,
@@ -191,7 +213,7 @@ def box_tensor_to_entity(box_tensor: Tensor | ndarray, names: list[str], frame: 
         x2=x2,
         y2=y2,
         confidence=confidence,
-        image=cropped_image_jpg_bytes,
+        image=cropped_image_bytes,
         image_mime=image_mime_to_encode,
     )
 

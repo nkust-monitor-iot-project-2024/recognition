@@ -22,7 +22,7 @@ def main() -> int:
         if not ok:
             continue
 
-        entities = recognizer.recognize_picture(frame)
+        entities = recognizer.recognize_frame(frame, "image/jpeg")
         for entity in entities:
             uuid = uuid4()
 
