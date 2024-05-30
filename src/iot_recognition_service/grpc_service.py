@@ -17,7 +17,7 @@ class RecognitionService(EntityRecognitionServicer):
         self.recognizer = recognizer
 
     def Recognize(self, request: RecognizeRequest, context: grpc.ServicerContext) -> RecognizeResponse:
-        with self.tracer.start_as_current_span("RecognitionService/Recognize", kind=SpanKind.SERVER) as span:
+        with self.tracer.start_as_current_span("recognition_service/recognize", kind=SpanKind.SERVER) as span:
             span.add_event("recognize picture")
             try:
                 entities = self.recognizer.recognize_picture(request.image, request.image_mime)

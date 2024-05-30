@@ -75,7 +75,7 @@ class Recognizer:
             ValueError: If the image MIME type is not supported.
         """
 
-        with self.tracer.start_as_current_span("Recognizer.recognize_frame", kind=SpanKind.INTERNAL) as span:
+        with self.tracer.start_as_current_span("recognizer/recognize_frame", kind=SpanKind.INTERNAL) as span:
             span.add_event("start recognition by calling YOLO")
             results: list[Results] = self.model.predict(frame, device=self.device)
             if len(results) == 0:
