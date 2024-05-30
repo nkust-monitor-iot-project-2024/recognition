@@ -15,6 +15,11 @@ from opentelemetry.exporter.otlp.proto.http.trace_exporter import OTLPSpanExport
 from opentelemetry.exporter.otlp.proto.http._log_exporter import OTLPLogExporter
 from opentelemetry.sdk.trace.export import SpanExporter
 from opentelemetry.sdk._logs.export import LogExporter
+from opentelemetry.metrics import set_meter_provider
+from opentelemetry.sdk.metrics import MeterProvider
+from opentelemetry.sdk.metrics.export import MetricExporter, ConsoleMetricExporter, PeriodicExportingMetricReader
+from opentelemetry.exporter.otlp.proto.http.metric_exporter import OTLPMetricExporter
+from opentelemetry.instrumentation.grpc import GrpcInstrumentorServer
 
 
 resource = Resource(attributes={
@@ -41,6 +46,13 @@ def setup_telemetry() -> None:
     )
     set_logger_provider(logger_provider)
 
+    reader = PeriodicExportingMetricReader(create_meter_exporter())
+    meterProvider = MeterProvider(resource=resource, metric_readers=[reader])
+    set_meter_provider(meterProvider)
+
+    GrpcInstrumentorServer().instrument()
+
+
 
 def create_trace_exporter() -> SpanExporter:
     """Setup the OpenTelemetry OTLP Span Exporter."""
@@ -58,3 +70,12 @@ def create_log_exporter() -> LogExporter:
         return ConsoleLogExporter()
 
     return OTLPLogExporter()
+
+
+def create_meter_exporter() -> MetricExporter:
+    """Setup the OpenTelemetry OTLP Metric Exporter."""
+
+    if os.getenv("IOT_RECOGNITION_EXPORTER_CONSOLE") == "true":
+        return ConsoleMetricExporter()
+
+    return OTLPMetricExporter()
