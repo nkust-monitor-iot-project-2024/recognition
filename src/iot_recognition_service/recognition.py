@@ -121,7 +121,7 @@ class Recognizer:
             ValueError: If the cropped image cannot be encoded to the given fromat.
         """
 
-        with self.tracer.start_as_current_span("Recognizer.recognize_picture", kind=SpanKind.INTERNAL) as span:
+        with self.tracer.start_as_current_span("recognizer/recognize_picture", kind=SpanKind.INTERNAL) as span:
             span.add_event("decoding picture")
             decoded_frame = decode_image(image, image_mime)
 
@@ -216,4 +216,3 @@ def box_tensor_to_entity(box_tensor: Tensor | ndarray, names: list[str], frame: 
         image=cropped_image_bytes,
         image_mime=image_mime_to_encode,
     )
-
