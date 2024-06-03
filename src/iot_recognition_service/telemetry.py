@@ -27,7 +27,7 @@ resource = Resource(attributes={
     ResourceAttributes.SERVICE_NAMESPACE: "iot-monitor",
     ResourceAttributes.SERVICE_VERSION: "v0",
     ResourceAttributes.SERVICE_INSTANCE_ID: uuid4().hex,
-    ResourceAttributes.DEPLOYMENT_ENVIRONMENT: "development", # fixme: switch to production after online
+    ResourceAttributes.DEPLOYMENT_ENVIRONMENT: os.getenv("ENVIRONMENT", "development")
 }, schema_url=ResourceAttributes.SCHEMA_URL)
 
 
